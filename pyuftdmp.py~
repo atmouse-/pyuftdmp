@@ -145,7 +145,7 @@ def main(argv):
             
     opurl=opUrlfilter(input_file)
     for n in opurl.reRep():
-        print("repetition:",n)
+        print(("repetition:",n))
     start_time= time.time()
     for n in opurl.reInc():
         print('inclusion:',n)
