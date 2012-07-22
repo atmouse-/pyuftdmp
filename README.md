@@ -1,4 +1,4 @@
 pyuftdmp
 ========
 
-an opera urlfilter.ini repetion dumper ,written on python
+an opera urlfilter.ini repetition dumper ,written on python
