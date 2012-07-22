@@ -6,7 +6,7 @@ Created on Dec 5, 2011
 @author: atmouse
 '''
 
-from __future__ import print_function ## compatable with python3.0's print function
+from __future__ import print_function ## compatable with python3's print function
 import sys,getopt,time
 import fnmatch
 
@@ -67,7 +67,13 @@ class opUrlfilter:
             for n in x.split('*'):
                 if n not in y:return False
             return fnmatch.fnmatchcase(y,x)
-
+            
+        pop_list=[]
+        def pop_key(key):
+            if key not in pop_list:
+                self.dump_excl.pop(key)
+                pop_list.append(key)
+                
         tempIncList=[]
         if self.rep==0:print("you must use reRep in code first");return None
         ## dump to two list,one with wild include,another didnt
@@ -83,18 +89,19 @@ class opUrlfilter:
 
         if wilds:
             for i in wilds:
+                wilds_i=wilds[i]
                 if nowilds:
                     for j in nowilds:
-                        if recp_cmp(wilds[i],nowilds[j]):
-                            tempIncList.append((i,j,wilds[i],nowilds[j]))
+                        if recp_cmp(wilds_i,nowilds[j]):
+                            tempIncList.append((i,j,wilds_i,nowilds[j]))
                             ## del the nowild inclutions
-                            self.dump_excl.pop(j)
+                            pop_key(j)
                 for k in wilds:
                     if i==k:continue
-                    if recp_cmp(wilds[i],wilds[k]):
-                        tempIncList.append((i,k,wilds[i],wilds[k]))
+                    if recp_cmp(wilds_i,wilds[k]):
+                        tempIncList.append((i,k,wilds_i,wilds[k]))
                         ## del the wild inclutions
-                        self.dump_excl.pop(k)
+                        pop_key(k)
         return tempIncList
         
     def dumptofile(self,tofile):
