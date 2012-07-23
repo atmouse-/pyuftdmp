@@ -65,8 +65,19 @@ class opUrlfilter:
         """ return the inclusion list """
         def recp_cmp(x,y):
             for n in x.split('*'):
-                if n not in y:return False
+                if n not in y:return 0
             return fnmatch.fnmatchcase(y,x)
+        def recp_cmp2(x,z):
+            """
+            z include by x :return 1
+            x include by z :return 2
+            """
+            for n in x.split('*'):
+                if n not in z:
+                    for m in z.split('*'):
+                        if m not in x:return 0
+                    if fnmatch.fnmatchcase(x,z):return 2
+            if fnmatch.fnmatchcase(z,x):return 1
             
         pop_list=[]
         def pop_key(key):
@@ -97,11 +108,16 @@ class opUrlfilter:
                             ## del the nowild inclutions
                             pop_key(j)
                 for k in wilds:
-                    if i==k:continue
-                    if recp_cmp(wilds_i,wilds[k]):
+                    if i<=k:continue
+                    flag=recp_cmp2(wilds_i,wilds[k])
+                    if flag==0:continue
+                    elif flag==1:
                         tempIncList.append((i,k,wilds_i,wilds[k]))
                         ## del the wild inclutions
                         pop_key(k)
+                    elif flag==2:
+                        tempIncList.append((k,i,wilds[k],wilds_i))
+                        pop_key(i)
         return tempIncList
         
     def dumptofile(self,tofile):
