@@ -63,21 +63,10 @@ class opUrlfilter:
             
     def reInc(self):
         """ return the inclusion list """
-        def recp_cmp(i,x,y): # i:"pos of x"
-            for n in wilds_split[i]:
+        def recp_cmp(px,x,y): # px:"pos of x"
+            for n in px:
                 if n not in y:return 0
             return fnmatch.fnmatchcase(y,x)
-        def recp_cmp2(i,k,x,z): # i:"pos of x" , k:"pos of z"
-            """
-            z include by x :return 1
-            x include by z :return 2
-            """
-            for n in wilds_split[i]:
-                if n not in z:
-                    for m in wilds_split[k]:
-                        if m not in x:return 0
-                    if fnmatch.fnmatchcase(x,z):return 2
-            return int(fnmatch.fnmatchcase(z,x))                        # return 1 or 0
             
         pop_list=[]
         def pop_key(key):
@@ -90,35 +79,32 @@ class opUrlfilter:
         ## dump to two list,one with wild include,another didnt
         wilds={}
         nowilds={}
-        #wilds={i:self.dump_excl[i] for i in self.dump_excl.keys() if ('*' in self.dump_excl[i] or '?' in self.dump_excl[i])}
-        #nowilds={i:self.dump_excl[i] for i in self.dump_excl.keys() if ('*' not in self.dump_excl[i] and '?' not in self.dump_excl[i])}
         for key,item in self.dump_excl.items():
             if '*' in item:
                 wilds[key]=item.replace('?','\?')
             else:
                 nowilds[key]=item.replace('?','\?')
-        
+                
         wilds_split={i:wilds[i].split('*') for i in wilds}
+        wilds_lens={i:len(wilds[i])-wilds[i].count('*') for i in wilds}
         if wilds:
-            for i in wilds:
-                wilds_i=wilds[i]
+            for i,wilds_i in wilds.items():
+                wilds_lens_i=wilds_lens[i]
+                wilds_spli_i=wilds_split[i]
                 if nowilds:
                     for j in nowilds:
-                        if recp_cmp(i,wilds_i,nowilds[j]):
+                        if recp_cmp(wilds_spli_i,wilds_i,nowilds[j]):
                             tempIncList.append((i,j,wilds_i,nowilds[j]))
                             ## del the nowild inclutions
                             pop_key(j)
                 for k in wilds:
-                    if i<=k:continue
-                    flag=recp_cmp2(i,k,wilds_i,wilds[k])
-                    if flag==0:continue
-                    elif flag==1:
+                    if wilds_lens_i>wilds_lens[k]:continue
+                    if i==k:continue
+                    if recp_cmp(wilds_spli_i,wilds_i,wilds[k]):
                         tempIncList.append((i,k,wilds_i,wilds[k]))
                         ## del the wild inclutions
                         pop_key(k)
-                    elif flag==2:
-                        tempIncList.append((k,i,wilds[k],wilds_i))
-                        pop_key(i)
+
         return tempIncList
         
     def dumptofile(self,tofile):
