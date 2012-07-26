@@ -63,7 +63,7 @@ class opUrlfilter:
             
     def reInc(self):
         """ return the inclusion list """
-        def recp_cmp(px,x,y): # px:"pos of x"
+        def recp_cmp(px,x,y): # px:"px is splite of x by '*'"
             for n in px:
                 if n not in y:return 0
             return fnmatch.fnmatchcase(y,x)
@@ -98,8 +98,7 @@ class opUrlfilter:
                             ## del the nowild inclutions
                             pop_key(j)
                 for k in wilds:
-                    if wilds_lens_i>wilds_lens[k]:continue
-                    if i==k:continue
+                    if wilds_lens_i>wilds_lens[k] or i==k:continue
                     if recp_cmp(wilds_spli_i,wilds_i,wilds[k]):
                         tempIncList.append((i,k,wilds_i,wilds[k]))
                         ## del the wild inclutions
